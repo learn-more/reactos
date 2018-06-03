@@ -66,7 +66,7 @@ MiniportHandleInterrupt(
         NdisDprAcquireSpinLock(&Adapter->Lock);
     }
 
-    if (Value & E1000_IMS_TXDW)
+    if (TRUE /*Value & E1000_IMS_TXDW*/)
     {
         while (Adapter->TxFull || Adapter->LastTxDesc != Adapter->CurrentTxDesc)
         {

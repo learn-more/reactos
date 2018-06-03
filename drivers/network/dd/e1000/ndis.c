@@ -66,6 +66,7 @@ MiniportSend(
 
     NdisReleaseSpinLock(&Adapter->Lock);
 
+   //return NDIS_STATUS_PENDING;
     return NDIS_STATUS_SUCCESS;
 }
 

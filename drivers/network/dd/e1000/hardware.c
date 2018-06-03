@@ -830,6 +830,12 @@ NICTransmitPacket(
 
     E1000WriteUlong(Adapter, E1000_REG_TDT, Adapter->CurrentTxDesc);
 
+    /* FIXME: Until we can indicate with NdisMSendComplete from our interrupt which packet is done.... */
+    while (!TransmitDescriptor->Status)
+    {
+        NdisStallExecution(1);
+    }
+
     NDIS_DbgPrint(MAX_TRACE, ("CurrentTxDesc:%u, LastTxDesc:%u\n", Adapter->CurrentTxDesc, Adapter->LastTxDesc));
 
     if (Adapter->CurrentTxDesc == Adapter->LastTxDesc)
