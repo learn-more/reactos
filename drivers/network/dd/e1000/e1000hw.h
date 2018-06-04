@@ -118,6 +118,7 @@ C_ASSERT(sizeof(E1000_TRANSMIT_DESCRIPTOR) == 16);
 
 #define E1000_REG_RCTL              0x0100      /* Receive Control Register, R/W */
 #define E1000_REG_TCTL              0x0400      /* Transmit Control Register, R/W */
+#define E1000_REG_TIPG              0x0410      /* Transmit IPG Register, R/W */
 
 #define E1000_REG_RDBAL             0x2800      /* Receive Descriptor Base Address Low, R/W */
 #define E1000_REG_RDBAH             0x2804      /* Receive Descriptor Base Address High, R/W */
@@ -137,7 +138,11 @@ C_ASSERT(sizeof(E1000_TRANSMIT_DESCRIPTOR) == 16);
 
 
 /* E1000_REG_CTRL */
+#define E1000_CTRL_LRST             (1 << 3)    /* Link Reset */
+#define E1000_CTRL_ASDE             (1 << 5)    /* Auto-Speed Detection Enable */
+#define E1000_CTRL_SLU              (1 << 6)    /* Set Link Up */
 #define E1000_CTRL_RST              (1 << 26)   /* Device Reset, Self clearing */
+#define E1000_CTRL_VME              (1 << 30)   /* VLAN Mode Enable */
 
 
 /* E1000_REG_STATUS */
@@ -192,7 +197,10 @@ C_ASSERT(sizeof(E1000_TRANSMIT_DESCRIPTOR) == 16);
 #define E1000_TCTL_EN               (1 << 1)    /* Transmit Enable */
 #define E1000_TCTL_PSP              (1 << 3)    /* Pad Short Packets */
 
-
+/* E1000_REG_TIPG */
+#define E1000_TIPG_IPGT_DEF         (10 << 0)   /* IPG Transmit Time */
+#define E1000_TIPG_IPGR1_DEF        (10 << 10)  /* IPG Receive Time 1 */
+#define E1000_TIPG_IPGR2_DEF        (10 << 20)  /* IPG Receive Time 2 */
 
 
 /* E1000_REG_RAH */

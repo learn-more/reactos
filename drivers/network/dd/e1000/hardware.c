@@ -151,7 +151,7 @@ static BOOLEAN E1000ReadMdic(IN PE1000_ADAPTER Adapter, IN ULONG Address, USHORT
 
 static BOOLEAN E1000ReadEeprom(IN PE1000_ADAPTER Adapter, IN UCHAR Address, USHORT *Result)
 {
-    UINT Value;
+    ULONG Value;
     UINT n;
 
     E1000WriteUlong(Adapter, E1000_REG_EERD, E1000_EERD_START | ((UINT)Address << E1000_EERD_ADDR_SHIFT));
@@ -528,6 +528,7 @@ NICSoftReset(
 
     NICDisableInterrupts(Adapter);
     E1000WriteUlong(Adapter, E1000_REG_RCTL, 0);
+    E1000WriteUlong(Adapter, E1000_REG_TCTL, 0);
     E1000ReadUlong(Adapter, E1000_REG_CTRL, &Value);
     /* Write this using IO port, some devices cannot ack this otherwise */
     E1000WriteIoUlong(Adapter, E1000_REG_CTRL, Value | E1000_CTRL_RST);
@@ -546,6 +547,11 @@ NICSoftReset(
             /* Clear out interrupts */
             E1000ReadUlong(Adapter, E1000_REG_ICR, &Value);
 
+
+            E1000ReadUlong(Adapter, E1000_REG_CTRL, &Value);
+            Value &= ~(E1000_CTRL_LRST|E1000_CTRL_VME);
+            Value |= (E1000_CTRL_ASDE|E1000_CTRL_SLU);
+            E1000WriteUlong(Adapter, E1000_REG_CTRL, Value);
             //NdisWriteRegisterUlong(Adapter->IoBase + E1000_REG_WUFC, 0);
             //NdisWriteRegisterUlong(Adapter->IoBase + E1000_REG_VET, E1000_VET_VLAN);
 
@@ -586,6 +592,7 @@ NICEnableTxRx(
     Value = E1000_TCTL_EN | E1000_TCTL_PSP;
     E1000WriteUlong(Adapter, E1000_REG_TCTL, Value);
 
+    E1000WriteUlong(Adapter, E1000_REG_TIPG, E1000_TIPG_IPGT_DEF | E1000_TIPG_IPGR1_DEF | E1000_TIPG_IPGR2_DEF);
 
     NDIS_DbgPrint(MID_TRACE, ("Setting up receive.\n"));
 

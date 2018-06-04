@@ -107,13 +107,13 @@ MiniportHandleInterrupt(
 
             if (ReceiveDescriptor->Length != 0)
             {
-                EthHeader = Adapter->ReceiveBuffer + BufferOffset;
+                EthHeader = (PETH_HEADER)(Adapter->ReceiveBuffer + BufferOffset);
 
                 NdisMEthIndicateReceive(Adapter->AdapterHandle,
                                         NULL,
-                                        EthHeader,
+                                        (PCHAR)EthHeader,
                                         sizeof(ETH_HEADER),
-                                        EthHeader + 1,
+                                        (PCHAR)(EthHeader + 1),
                                         ReceiveDescriptor->Length - sizeof(ETH_HEADER),
                                         ReceiveDescriptor->Length - sizeof(ETH_HEADER));
 

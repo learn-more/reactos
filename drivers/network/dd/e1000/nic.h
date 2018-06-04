@@ -60,8 +60,8 @@ typedef struct _E1000_ADAPTER
     NDIS_MINIPORT_INTERRUPT Interrupt;
     BOOLEAN InterruptRegistered;
 
-    ULONG InterruptMask;
-    ULONG InterruptPending;
+    LONG InterruptMask;
+    LONG InterruptPending;
 
 
     /* Transmit */
