@@ -30,6 +30,8 @@ typedef struct _ETH_HEADER {
 } ETH_HEADER, *PETH_HEADER;
 
 
+C_ASSERT(sizeof(ETH_HEADER) == 14);
+
 
 typedef enum _E1000_RCVBUF_SIZE
 {

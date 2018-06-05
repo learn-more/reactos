@@ -25,7 +25,9 @@
 
 typedef struct _E1000_ADAPTER
 {
-    NDIS_SPIN_LOCK Lock;
+    NDIS_SPIN_LOCK AdapterLock;
+    NDIS_SPIN_LOCK SendLock;
+
     NDIS_HANDLE AdapterHandle;
     USHORT VendorID;
     USHORT DeviceID;
@@ -67,6 +69,8 @@ typedef struct _E1000_ADAPTER
     /* Transmit */
     PE1000_TRANSMIT_DESCRIPTOR TransmitDescriptors;
     NDIS_PHYSICAL_ADDRESS TransmitDescriptorsPa;
+
+    PNDIS_PACKET TransmitPackets[NUM_TRANSMIT_DESCRIPTORS];
 
     ULONG CurrentTxDesc;
     ULONG LastTxDesc;

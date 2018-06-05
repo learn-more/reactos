@@ -614,6 +614,11 @@ NICEnableTxRx(
     /* Setup Interrupt Throttling */
     E1000WriteUlong(Adapter, E1000_REG_ITR, DEFAULT_ITR);
 
+#define EM_RADV                         64
+#define EM_TICKS_TO_USECS(ticks)	((1024 * (ticks) + 500) / 1000)
+#define E1000_REG_RADV	0x0282C  /* Rx Interrupt Absolute Delay Timer - RW */
+    E1000WriteUlong(Adapter, E1000_REG_RADV, EM_TICKS_TO_USECS(EM_RADV));
+
     /* Some defaults */
     Value = E1000_RCTL_SECRC | E1000_RCTL_EN;
 
@@ -641,9 +646,9 @@ NICDisableTxRx(
     Value &= ~E1000_TCTL_EN;
     E1000WriteUlong(Adapter, E1000_REG_TCTL, Value);
 
-    //E1000ReadUlong(Adapter, E1000_REG_RCTL, &Value);
-    //Value &= ~E1000_RCTL_EN;
-    //E1000WriteUlong(Adapter, E1000_REG_RCTL, Value);
+    E1000ReadUlong(Adapter, E1000_REG_RCTL, &Value);
+    Value &= ~E1000_RCTL_EN;
+    E1000WriteUlong(Adapter, E1000_REG_RCTL, Value);
 
     return NDIS_STATUS_SUCCESS;
 }
@@ -731,7 +736,7 @@ NICApplyInterruptMask(
 {
     NDIS_DbgPrint(MAX_TRACE, ("Called.\n"));
 
-    E1000WriteUlong(Adapter, E1000_REG_IMS, Adapter->InterruptMask);
+    E1000WriteUlong(Adapter, E1000_REG_IMS, Adapter->InterruptMask /*| 0x1F6DC*/);
     return NDIS_STATUS_SUCCESS;
 }
 
@@ -754,7 +759,7 @@ NICInterruptRecognized(
 {
     ULONG Value;
 
-    NDIS_DbgPrint(MAX_TRACE, ("Called.\n"));
+    //NDIS_DbgPrint(MAX_TRACE, ("Called.\n"));
 
     /* Reading the interrupt acknowledges them */
     E1000ReadUlong(Adapter, E1000_REG_ICR, &Value);
@@ -822,7 +827,7 @@ NICTransmitPacket(
 {
     volatile PE1000_TRANSMIT_DESCRIPTOR TransmitDescriptor;
 
-    NDIS_DbgPrint(MAX_TRACE, ("Called.\n"));
+    //NDIS_DbgPrint(MAX_TRACE, ("Called.\n"));
 
     TransmitDescriptor = Adapter->TransmitDescriptors + Adapter->CurrentTxDesc;
     TransmitDescriptor->Address = PhysicalAddress;
@@ -838,12 +843,12 @@ NICTransmitPacket(
     E1000WriteUlong(Adapter, E1000_REG_TDT, Adapter->CurrentTxDesc);
 
     /* FIXME: Until we can indicate with NdisMSendComplete from our interrupt which packet is done.... */
-    while (!TransmitDescriptor->Status)
-    {
-        NdisStallExecution(1);
-    }
+    //while (!TransmitDescriptor->Status)
+    //{
+    //    NdisStallExecution(1);
+    //}
 
-    NDIS_DbgPrint(MAX_TRACE, ("CurrentTxDesc:%u, LastTxDesc:%u\n", Adapter->CurrentTxDesc, Adapter->LastTxDesc));
+    //NDIS_DbgPrint(MAX_TRACE, ("CurrentTxDesc:%u, LastTxDesc:%u\n", Adapter->CurrentTxDesc, Adapter->LastTxDesc));
 
     if (Adapter->CurrentTxDesc == Adapter->LastTxDesc)
     {
