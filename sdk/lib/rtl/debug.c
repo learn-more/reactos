@@ -70,6 +70,12 @@ vDbgPrintExWithPrefixInternal(IN PCCH Prefix,
         return STATUS_SUCCESS;
     }
 
+    if (ComponentId == 30)
+    {
+        ComponentId = ~0;
+        Level = DPFLTR_ERROR_LEVEL;
+    }
+
     /* For user mode, don't recursively DbgPrint */
     if (RtlpSetInDbgPrint()) return STATUS_SUCCESS;
 
