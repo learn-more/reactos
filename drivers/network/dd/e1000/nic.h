@@ -21,12 +21,25 @@
 #define DRIVER_VERSION 1
 
 
-#define DEFAULT_INTERRUPT_MASK      (E1000_IMS_LSC | /*E1000_IMS_TXDW | */E1000_IMS_RXDMT0 | E1000_IMS_RXT0)
+#define DEFAULT_INTERRUPT_MASK      (E1000_IMS_LSC | E1000_IMS_TXDW | E1000_IMS_TXQE | E1000_IMS_RXDMT0 | E1000_IMS_RXT0 | E1000_IMS_TXD_LOW | E1000_IMS_SRPD)
+
+
+#if 0
+#define E1000_LOCK_ADAPTER(_Adapter)    NdisDprAcquireSpinLock(&(_Adapter)->AdapterLock)
+#define E1000_UNLOCK_ADAPTER(_Adapter)  NdisReleaseSpinLock(&(_Adapter)->AdapterLock)
+#define E1000_LOCK_SEND(_Adapter)       NdisDprAcquireSpinLock(&(_Adapter)->SendLock)
+#define E1000_UNLOCK_SEND(_Adapter)     NdisReleaseSpinLock(&(_Adapter)->SendLock)
+#else
+#define E1000_LOCK_ADAPTER(_Adapter)    do { } while (0)
+#define E1000_UNLOCK_ADAPTER(_Adapter)  do { } while (0)
+#define E1000_LOCK_SEND(_Adapter)       do { } while (0)
+#define E1000_UNLOCK_SEND(_Adapter)     do { } while (0)
+#endif
 
 typedef struct _E1000_ADAPTER
 {
-    NDIS_SPIN_LOCK AdapterLock;
-    NDIS_SPIN_LOCK SendLock;
+    //NDIS_SPIN_LOCK AdapterLock;
+    //NDIS_SPIN_LOCK SendLock;
 
     NDIS_HANDLE AdapterHandle;
     USHORT VendorID;
@@ -218,6 +231,13 @@ NTAPI
 MiniportHandleInterrupt(
     IN NDIS_HANDLE MiniportAdapterContext);
 
+
+VOID
+NTAPI
+E1000ReadUlong(
+    IN PE1000_ADAPTER Adapter,
+    IN ULONG Address,
+    OUT PULONG Value);
 
 VOID
 NTAPI

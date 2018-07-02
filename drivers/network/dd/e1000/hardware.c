@@ -29,7 +29,7 @@ VOID NTAPI E1000WriteUlong(IN PE1000_ADAPTER Adapter, IN ULONG Address, IN ULONG
     NdisWriteRegisterUlong((PULONG)(Adapter->IoBase + Address), Value);
 }
 
-static VOID E1000ReadUlong(IN PE1000_ADAPTER Adapter, IN ULONG Address, OUT PULONG Value)
+VOID NTAPI E1000ReadUlong(IN PE1000_ADAPTER Adapter, IN ULONG Address, OUT PULONG Value)
 {
     NdisReadRegisterUlong((PULONG)(Adapter->IoBase + Address), Value);
 }
@@ -552,8 +552,9 @@ NICSoftReset(
             Value &= ~(E1000_CTRL_LRST|E1000_CTRL_VME);
             Value |= (E1000_CTRL_ASDE|E1000_CTRL_SLU);
             E1000WriteUlong(Adapter, E1000_REG_CTRL, Value);
-            //NdisWriteRegisterUlong(Adapter->IoBase + E1000_REG_WUFC, 0);
-            //NdisWriteRegisterUlong(Adapter->IoBase + E1000_REG_VET, E1000_VET_VLAN);
+            //E1000WriteUlong(Adapter->IoBase + E1000_REG_WUFC, 0);
+#define E1000_VET_VLAN  0x8100
+            E1000WriteUlong(Adapter, E1000_REG_VET, E1000_VET_VLAN);
 
             return NDIS_STATUS_SUCCESS;
         }
@@ -612,7 +613,8 @@ NICEnableTxRx(
     Adapter->CurrentRxDesc = 0;
 
     /* Setup Interrupt Throttling */
-    E1000WriteUlong(Adapter, E1000_REG_ITR, DEFAULT_ITR);
+    //E1000WriteUlong(Adapter, E1000_REG_ITR, DEFAULT_ITR);
+
 
 #define EM_RADV                         64
 #define EM_TICKS_TO_USECS(ticks)	((1024 * (ticks) + 500) / 1000)
@@ -827,13 +829,13 @@ NICTransmitPacket(
 {
     volatile PE1000_TRANSMIT_DESCRIPTOR TransmitDescriptor;
 
-    //NDIS_DbgPrint(MAX_TRACE, ("Called.\n"));
+    NDIS_DbgPrint(MAX_TRACE, ("Called.\n"));
 
     TransmitDescriptor = Adapter->TransmitDescriptors + Adapter->CurrentTxDesc;
     TransmitDescriptor->Address = PhysicalAddress;
     TransmitDescriptor->Length = Length;
     TransmitDescriptor->ChecksumOffset = 0;
-    TransmitDescriptor->Command = E1000_TDESC_CMD_RS | E1000_TDESC_CMD_IFCS | E1000_TDESC_CMD_EOP;
+    TransmitDescriptor->Command = E1000_TDESC_CMD_RS | /*E1000_TDESC_CMD_IFCS |*/ E1000_TDESC_CMD_EOP;
     TransmitDescriptor->Status = 0;
     TransmitDescriptor->ChecksumStartField = 0;
     TransmitDescriptor->Special = 0;

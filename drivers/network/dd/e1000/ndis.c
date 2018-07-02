@@ -44,11 +44,11 @@ MiniportSend(
 
     //NDIS_DbgPrint(MAX_TRACE, ("Sending %d byte packet\n", sgList->Elements[0].Length));
 
-    NdisAcquireSpinLock(&Adapter->SendLock);
+    E1000_LOCK_SEND(Adapter);
 
     if (Adapter->TxFull)
     {
-        NdisReleaseSpinLock(&Adapter->SendLock);
+        E1000_UNLOCK_SEND(Adapter);
         NDIS_DbgPrint(MIN_TRACE, ("All TX descriptors are full\n"));
         return NDIS_STATUS_RESOURCES;
     }
@@ -60,12 +60,12 @@ MiniportSend(
     Status = NICTransmitPacket(Adapter, TransmitBuffer, TransmitLength);
     if (Status != NDIS_STATUS_SUCCESS)
     {
-        NdisReleaseSpinLock(&Adapter->SendLock);
+        E1000_UNLOCK_SEND(Adapter);
         NDIS_DbgPrint(MIN_TRACE, ("Transmit packet failed\n"));
         return Status;
     }
 
-    NdisReleaseSpinLock(&Adapter->SendLock);
+    E1000_UNLOCK_SEND(Adapter);
 
     return NDIS_STATUS_PENDING;
     //return NDIS_STATUS_SUCCESS;
@@ -139,8 +139,8 @@ MiniportInitialize(
 
     RtlZeroMemory(Adapter, sizeof(*Adapter));
     Adapter->AdapterHandle = MiniportAdapterHandle;
-    NdisAllocateSpinLock(&Adapter->AdapterLock);
-    NdisAllocateSpinLock(&Adapter->SendLock);
+    //NdisAllocateSpinLock(&Adapter->AdapterLock);
+    //NdisAllocateSpinLock(&Adapter->SendLock);
 
 
     /* Notify NDIS of some characteristics of our NIC */

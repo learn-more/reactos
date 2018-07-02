@@ -66,7 +66,7 @@ MiniportQueryInformation(
     copySource = &genericUlong;
     copyLength = sizeof(ULONG);
 
-    NdisAcquireSpinLock(&Adapter->AdapterLock);
+    E1000_LOCK_ADAPTER(Adapter);
 
     switch (Oid)
     {
@@ -219,7 +219,7 @@ MiniportQueryInformation(
         *BytesNeeded = 0;
     }
 
-    NdisReleaseSpinLock(&Adapter->AdapterLock);
+    E1000_UNLOCK_ADAPTER(Adapter);
     /* XMIT_ERROR and RCV_ERROR are really noisy, so do not log those. */
     if (Oid != OID_GEN_XMIT_ERROR && Oid != OID_GEN_RCV_ERROR)
     {
@@ -246,7 +246,7 @@ MiniportSetInformation(
 
     status = NDIS_STATUS_SUCCESS;
 
-    NdisAcquireSpinLock(&Adapter->AdapterLock);
+    E1000_LOCK_ADAPTER(Adapter);
 
     switch (Oid)
     {
@@ -343,7 +343,7 @@ MiniportSetInformation(
         *BytesNeeded = 0;
     }
 
-    NdisReleaseSpinLock(&Adapter->AdapterLock);
+    E1000_UNLOCK_ADAPTER(Adapter);
 
     return status;
 }

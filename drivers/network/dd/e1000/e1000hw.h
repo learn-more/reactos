@@ -171,9 +171,12 @@ C_ASSERT(sizeof(E1000_TRANSMIT_DESCRIPTOR) == 16);
 
 /* E1000_REG_IMS */
 #define E1000_IMS_TXDW              (1 << 0)    /* Transmit Descriptor Written Back */
+#define E1000_IMS_TXQE              (1 << 1)    /* Transmit Queue Empty */
 #define E1000_IMS_LSC               (1 << 2)    /* Sets mask for Link Status Change */
 #define E1000_IMS_RXDMT0            (1 << 4)    /* Receive Descriptor Minimum Threshold Reached */
 #define E1000_IMS_RXT0              (1 << 7)    /* Receiver Timer Interrupt */
+#define E1000_IMS_TXD_LOW           (1 << 15)   /* Transmit Descriptor Low Threshold hit */
+#define E1000_IMS_SRPD              (1 << 16)   /* Small Receive Packet Detection */
 
 
 /* E1000_REG_ITR */
