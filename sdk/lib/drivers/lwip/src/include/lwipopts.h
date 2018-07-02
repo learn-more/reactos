@@ -117,42 +117,42 @@
 /**
  * NETIF_DEBUG: Enable debugging in netif.c.
  */
-#define NETIF_DEBUG                     LWIP_DBG_OFF
+#define NETIF_DEBUG                     LWIP_DBG_ON
 
 /**
  * PBUF_DEBUG: Enable debugging in pbuf.c.
  */
-#define PBUF_DEBUG                      LWIP_DBG_OFF
+#define PBUF_DEBUG                      LWIP_DBG_ON
 
 /**
  * INET_DEBUG: Enable debugging in inet.c.
  */
-#define INET_DEBUG                      LWIP_DBG_OFF
+#define INET_DEBUG                      LWIP_DBG_ON
 
 /**
  * IP_DEBUG: Enable debugging for IP.
  */
-#define IP_DEBUG                        LWIP_DBG_OFF
+#define IP_DEBUG                        LWIP_DBG_ON
 
 /**
  * IP_REASS_DEBUG: Enable debugging in ip_frag.c for both frag & reass.
  */
-#define IP_REASS_DEBUG                  LWIP_DBG_OFF
+#define IP_REASS_DEBUG                  LWIP_DBG_ON
 
 /**
  * MEM_DEBUG: Enable debugging in mem.c.
  */
-#define MEM_DEBUG                       LWIP_DBG_OFF
+#define MEM_DEBUG                       LWIP_DBG_ON
 
 /**
  * MEMP_DEBUG: Enable debugging in memp.c.
  */
-#define MEMP_DEBUG                      LWIP_DBG_OFF
+#define MEMP_DEBUG                      LWIP_DBG_ON
 
 /**
  * SYS_DEBUG: Enable debugging in sys.c.
  */
-#define SYS_DEBUG                       LWIP_DBG_OFF
+#define SYS_DEBUG                       LWIP_DBG_ON
 
 /**
  * TCP_DEBUG: Enable debugging for TCP.
@@ -162,45 +162,47 @@
 /**
  * TCP_INPUT_DEBUG: Enable debugging in tcp_in.c for incoming debug.
  */
-#define TCP_INPUT_DEBUG                 LWIP_DBG_OFF
+#define TCP_INPUT_DEBUG                 LWIP_DBG_ON
 
 /**
  * TCP_FR_DEBUG: Enable debugging in tcp_in.c for fast retransmit.
  */
-#define TCP_FR_DEBUG                    LWIP_DBG_OFF
+#define TCP_FR_DEBUG                    LWIP_DBG_ON
 
 /**
  * TCP_RTO_DEBUG: Enable debugging in TCP for retransmit
  * timeout.
  */
-#define TCP_RTO_DEBUG                   LWIP_DBG_OFF
+#define TCP_RTO_DEBUG                   LWIP_DBG_ON
 
 /**
  * TCP_CWND_DEBUG: Enable debugging for TCP congestion window.
  */
-#define TCP_CWND_DEBUG                  LWIP_DBG_OFF
+#define TCP_CWND_DEBUG                  LWIP_DBG_ON
 
 /**
  * TCP_WND_DEBUG: Enable debugging in tcp_in.c for window updating.
  */
-#define TCP_WND_DEBUG                   LWIP_DBG_OFF
+#define TCP_WND_DEBUG                   LWIP_DBG_ON
 
 /**
  * TCP_OUTPUT_DEBUG: Enable debugging in tcp_out.c output functions.
  */
-#define TCP_OUTPUT_DEBUG                LWIP_DBG_OFF
+#define TCP_OUTPUT_DEBUG                LWIP_DBG_ON
 
 /**
  * TCP_RST_DEBUG: Enable debugging for TCP with the RST message.
  */
-#define TCP_RST_DEBUG                   LWIP_DBG_OFF
+#define TCP_RST_DEBUG                   LWIP_DBG_ON
 
 /**
  * TCP_QLEN_DEBUG: Enable debugging for TCP queue lengths.
  */
-#define TCP_QLEN_DEBUG                  LWIP_DBG_OFF
+#define TCP_QLEN_DEBUG                  LWIP_DBG_ON
 
 /**
  * TCPIP_DEBUG: Enable debugging in tcpip.c.
  */
-#define TCPIP_DEBUG                     LWIP_DBG_OFF
+#define TCPIP_DEBUG                     LWIP_DBG_ON
+
+#define LWIP_DEBUG
