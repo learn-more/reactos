@@ -16,7 +16,7 @@
 #if DBG
 
 /* See debug.h for debug/trace constants */
-ULONG DebugTraceLevel = MIN_TRACE;
+ULONG DebugTraceLevel = MAX_TRACE | DEBUG_PROTOCOL | DEBUG_PACKET;
 
 #endif /* DBG */
 

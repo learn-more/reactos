@@ -59,7 +59,8 @@ KSPIN_LOCK AdapterListLock;
 
 VOID
 MiniDisplayPacket(
-    PNDIS_PACKET Packet)
+    PNDIS_PACKET Packet,
+    PCSTR Reason)
 {
 #if DBG
     ULONG i, Length;
@@ -71,15 +72,15 @@ MiniDisplayPacket(
             0,
             64);
 
-        DbgPrint("*** PACKET START ***");
+        DbgPrint("*** %s PACKET START (%p) ***\n", Reason, Packet);
 
         for (i = 0; i < Length; i++) {
-            if (i % 12 == 0)
+            if (i % 16 == 0)
                 DbgPrint("\n%04X ", i);
             DbgPrint("%02X ", Buffer[i]);
         }
 
-        DbgPrint("*** PACKET STOP ***\n");
+        DbgPrint("\n*** %s PACKET STOP ***\n", Reason);
     }
 #endif /* DBG */
 }
