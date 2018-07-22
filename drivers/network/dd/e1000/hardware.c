@@ -610,7 +610,8 @@ NICEnableTxRx(
     /* Receive descriptor tail / head */
     E1000WriteUlong(Adapter, E1000_REG_RDH, 0);
     E1000WriteUlong(Adapter, E1000_REG_RDT, NUM_RECEIVE_DESCRIPTORS - 1);
-    Adapter->CurrentRxDesc = 0;
+    //E1000WriteUlong(Adapter, E1000_REG_RDT, 0);
+    //Adapter->CurrentRxDesc = 0;
 
     /* Setup Interrupt Throttling */
     //E1000WriteUlong(Adapter, E1000_REG_ITR, DEFAULT_ITR);
@@ -767,6 +768,8 @@ NICInterruptRecognized(
     E1000ReadUlong(Adapter, E1000_REG_ICR, &Value);
 
     *InterruptRecognized = (Value & Adapter->InterruptMask) != 0;
+
+    NDIS_DbgPrint(MAX_TRACE, ("NICInterruptRecognized(0x%x, 0x%x).\n", Value, *InterruptRecognized));
 
     return (Value & Adapter->InterruptMask);
 }

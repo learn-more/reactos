@@ -55,7 +55,7 @@ MiniportHandleInterrupt(
         ULONG Status;
 
         InterruptPending &= ~E1000_IMS_LSC;
-        NDIS_DbgPrint(MIN_TRACE, ("Link status changed!.\n"));
+        NDIS_DbgPrint(MAX_TRACE, ("Link status changed!.\n"));
 
         NICUpdateLinkStatus(Adapter);
 
@@ -74,21 +74,27 @@ MiniportHandleInterrupt(
         PETH_HEADER EthHeader;
         ULONG BufferOffset;
         BOOLEAN bGotAny = FALSE;
-        ULONG CurrentRxDesc;
+        //ULONG CurrentRxDesc;
+        ULONG RxDescHead, RxDescTail, CurrRxDesc;
 
         /* Clear out these interrupts */
         InterruptPending &= ~(E1000_IMS_RXDMT0 | E1000_IMS_RXT0);
 
-        while (TRUE)
+        E1000ReadUlong(Adapter, E1000_REG_RDH, &RxDescHead);
+        E1000ReadUlong(Adapter, E1000_REG_RDT, &RxDescTail);
+
+        while (((RxDescTail + 1)  % NUM_RECEIVE_DESCRIPTORS) != RxDescHead)
         {
-            BufferOffset = Adapter->CurrentRxDesc * Adapter->ReceiveBufferEntrySize;
-            ReceiveDescriptor = Adapter->ReceiveDescriptors + Adapter->CurrentRxDesc;
+            CurrRxDesc = (RxDescTail + 1)  % NUM_RECEIVE_DESCRIPTORS;
+            //__debugbreak();
+            BufferOffset = CurrRxDesc * Adapter->ReceiveBufferEntrySize;
+            ReceiveDescriptor = Adapter->ReceiveDescriptors + CurrRxDesc;
 
             if (!(ReceiveDescriptor->Status & E1000_RDESC_STATUS_DD))
             {
                 /* Not received yet */
                 //if (!bGotAny)
-                //    __debugbreak();
+                    __debugbreak();
                 break;
             }
 
@@ -131,16 +137,19 @@ MiniportHandleInterrupt(
             /* Give the descriptor back */
             ReceiveDescriptor->Status = 0;
             bGotAny = TRUE;
-            CurrentRxDesc = Adapter->CurrentRxDesc;
-            Adapter->CurrentRxDesc = (Adapter->CurrentRxDesc + 1) % NUM_RECEIVE_DESCRIPTORS;
+            //CurrentRxDesc = Adapter->CurrentRxDesc;
+            //Adapter->CurrentRxDesc = (Adapter->CurrentRxDesc + 1) % NUM_RECEIVE_DESCRIPTORS;
+            //RxDescTail = (RxDescTail + 1) % NUM_RECEIVE_DESCRIPTORS;
+            RxDescTail = CurrRxDesc;
         }
         if (bGotAny)
         {
-            E1000WriteUlong(Adapter, E1000_REG_RDT, CurrentRxDesc);
-            NDIS_DbgPrint(MAX_TRACE, ("Rx: Done (%u)\n", CurrentRxDesc));
+            E1000WriteUlong(Adapter, E1000_REG_RDT, RxDescTail);
+            NDIS_DbgPrint(MAX_TRACE, ("Rx: Done (%u)\n", RxDescTail));
 
-            E1000ReadUlong(Adapter, E1000_REG_RDH, &Value);
-            NDIS_DbgPrint(MAX_TRACE, ("Rx: TDT: (RDH: %u, RDT: %u)\n", Value, Adapter->CurrentRxDesc));
+            //E1000ReadUlong(Adapter, E1000_REG_RDH, &Value);
+            //NDIS_DbgPrint(MAX_TRACE, ("Rx: TDT: (RDH: %u, RDT: %u)\n", Value, Adapter->CurrentRxDesc));
+            NDIS_DbgPrint(MAX_TRACE, ("Rx: TDT: (RDH: %u, RDT: %u)\n", RxDescHead, RxDescTail));
 
             NdisMEthIndicateReceiveComplete(Adapter->AdapterHandle);
         }

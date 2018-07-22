@@ -94,7 +94,7 @@ typedef struct _E1000_ADAPTER
     PE1000_RECEIVE_DESCRIPTOR ReceiveDescriptors;
     NDIS_PHYSICAL_ADDRESS ReceiveDescriptorsPa;
 
-    ULONG CurrentRxDesc;
+    //ULONG CurrentRxDesc;
 
     E1000_RCVBUF_SIZE ReceiveBufferType;
     volatile PUCHAR ReceiveBuffer;
