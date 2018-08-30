@@ -6,4 +6,11 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 #include <reactos/manifest_exe.rc>
 
+9911 RT_MANIFEST "comctl32v5.manifest"
+9912 RT_MANIFEST "comctl32v6.manifest"
+
+
 5 BITMAP "test.bmp"
+6 BITMAP "16x16.bmp"
+
+

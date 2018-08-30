@@ -17,6 +17,13 @@
 #define ok_rect(rc, l,r,t,b) ok((rc.left == (l)) && (rc.right == (r)) && (rc.top == (t)) && (rc.bottom == (b)), "Wrong rect. expected %d, %d, %d, %d got %ld, %ld, %ld, %ld\n", l,t,r,b, rc.left, rc.top, rc.right, rc.bottom)
 #define ok_size(s, width, height) ok((s.cx == (width) && s.cy == (height)), "Expected size (%lu,%lu) got (%lu,%lu)\n", (LONG)width, (LONG)height, s.cx, s.cy)
 
+static HIMAGELIST (WINAPI *pImageList_LoadImageA)(HINSTANCE hi,LPCSTR lpbmp,int cx,int cGrow,COLORREF crMask,UINT uType,UINT uFlags);
+static BOOL (WINAPI *pSetWindowSubclass)(HWND hWnd, SUBCLASSPROC pfnSubclass, UINT_PTR uIDSubclass, DWORD_PTR dwRef);
+static LRESULT (WINAPI *pDefSubclassProc)(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+
+
+
 void Test_TextMargin()
 {
     RECT rc;
@@ -174,7 +181,7 @@ void Test_GetIdealSizeNoThemes()
     ok (ret == TRUE, "Expected BCM_GETIDEALSIZE to succeed\n");
     ok_size(s, 100, 100);
 
-    himl = ImageList_LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(5), 1, 1, 0, IMAGE_BITMAP, 0);
+    himl = pImageList_LoadImageA(GetModuleHandle(NULL), MAKEINTRESOURCE(5), 1, 1, 0, IMAGE_BITMAP, 0);
     ok (himl != 0, "Expected ImageList_LoadImage to succeed\n");
 
     memset(&imlData, 0, sizeof(imlData));
@@ -431,7 +438,7 @@ static LRESULT CALLBACK subclass_proc(HWND hwnd, UINT message, WPARAM wParam, LP
     int iwnd = get_iwnd(hwnd);
 
     if(message > WM_USER || !iwnd )
-        return DefSubclassProc(hwnd, message, wParam, lParam);
+        return pDefSubclassProc(hwnd, message, wParam, lParam);
 
     switch(message)
     {
@@ -458,7 +465,7 @@ static LRESULT CALLBACK subclass_proc(HWND hwnd, UINT message, WPARAM wParam, LP
     default:
         RECORD_MESSAGE(iwnd, message, SENT, 0,0);
     }
-    return DefSubclassProc(hwnd, message, wParam, lParam);
+    return pDefSubclassProc(hwnd, message, wParam, lParam);
 }
 
 static LRESULT CALLBACK TestProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -708,7 +715,7 @@ void Test_MessagesNonThemed()
     hWnd2 = CreateWindowW(L"Button", L"test button", /*BS_RADIOBUTTON | */WS_CHILD | WS_VISIBLE, 0, 0, 100, 100, hWnd1, NULL, NULL, NULL);
     ok (hWnd2 != NULL, "Expected CreateWindowW to succeed\n");
     SetWindowTheme(hWnd2, L"", L"");
-    SetWindowSubclass(hWnd2, subclass_proc, 0, 0);
+    pSetWindowSubclass(hWnd2, subclass_proc, 0, 0);
     UpdateWindow(hWnd2);
 
     FlushMessages();
@@ -840,7 +847,7 @@ void Test_MessagesThemed()
 
     hWnd2 = CreateWindowW(L"Button", L"test button", /*BS_RADIOBUTTON | */WS_CHILD | WS_VISIBLE, 0, 0, 100, 100, hWnd1, NULL, NULL, NULL);
     ok (hWnd2 != NULL, "Expected CreateWindowW to succeed\n");
-    SetWindowSubclass(hWnd2, subclass_proc, 0, 0);
+    pSetWindowSubclass(hWnd2, subclass_proc, 0, 0);
     UpdateWindow(hWnd2);
 
     FlushMessages();
@@ -924,7 +931,11 @@ void Test_MessagesThemed()
 
 START_TEST(button)
 {
-    LoadLibraryW(L"comctl32.dll"); /* same as statically linking to comctl32 and doing InitCommonControls */
+    HMODULE mod = LoadLibraryW(L"comctl32.dll"); /* same as statically linking to comctl32 and doing InitCommonControls */
+    pImageList_LoadImageA = (void*)GetProcAddress(mod, "ImageList_LoadImageA");
+    pSetWindowSubclass = (void*)GetProcAddress(mod, "SetWindowSubclass");
+    pDefSubclassProc = (void*)GetProcAddress(mod, "DefSubclassProc");
+
     Test_TextMargin();
     Test_Imagelist();
     Test_GetIdealSizeNoThemes();
