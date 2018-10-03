@@ -208,39 +208,43 @@ def size_of_image_fallback(filename):
     with open(filename, 'rb') as fin:
         if fin.read(2) != b'MZ':
             print(filename, 'No dos header found!')
-            return 0
+            return 0, False
         fin.seek(0x3C)
         e_lfanew = struct.unpack('i', fin.read(4))[0]
         fin.seek(e_lfanew)
         if fin.read(4) != b'PE\0\0':
             print(filename, 'No PE header found!')
-            return 0
+            return 0, False
         fin.seek(e_lfanew + 0x18)
         pe_magic = struct.unpack('h', fin.read(2))[0]
         if pe_magic in IMAGE_TYPES.keys():
             IMAGE_TYPES[pe_magic] += 1
             fin.seek(e_lfanew + 0x50)
             pe_size_of_image = struct.unpack('i', fin.read(4))[0]
-            return pe_size_of_image
+            return pe_size_of_image, pe_magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC
         print(filename, 'Unknown executable format!')
-        return 0
+        return 0, False
 
 
 def size_of_image_verify(filename):
-    pefile_size = pefile.PE(filename, fast_load=True).OPTIONAL_HEADER.SizeOfImage
-    custom_size = size_of_image_fallback(filename)
+    pefile_obj = pefile.PE(filename, fast_load=True)
+    pefile_size = pefile_obj.OPTIONAL_HEADER.SizeOfImage
+    pefile_x64 = pefile_obj.OPTIONAL_HEADER.Magic == pefile.OPTIONAL_HEADER_MAGIC_PE_PLUS
+    custom_size, custom_x64 = size_of_image_fallback(filename)
     assert custom_size == pefile_size, filename
-    return custom_size
+    assert custom_x64 == pefile_x64, filename
+    return custom_size, custom_x64
 
 SIZE_OF_IMAGE_FN = size_of_image_fallback
 
 class Module(object):
-    def __init__(self, name, address, size, filename):
+    def __init__(self, name, address, size, filename, x64):
         self._name = name
         self.address = address
         self.size = size
         self._reserved = address != 0
         self.filename = filename
+        self.x64 = x64
 
     def gen_baseaddress(self):
         name, ext = os.path.splitext(self._name)
@@ -248,10 +252,16 @@ class Module(object):
         if ext in('.acm', '.drv') and self._name != 'winspool.drv':
             name = self._name
         if name == 'ntdll':
-            postfix = ' # should be above 0x%08x' % self.address
+            if self.x64:
+                postfix = ' # should be above 0x%016x' % self.address
+            else:
+                postfix = ' # should be above 0x%08x' % self.address
         elif self._reserved:
             postfix = ' # reserved'
-        print('set(baseaddress_%-30s 0x%08x)%s' % (name, self.address, postfix))
+        if self.x64:
+            print('set(baseaddress_%-30s 0x%016x)%s' % (name, self.address, postfix))
+        else:
+            print('set(baseaddress_%-30s 0x%08x)%s' % (name, self.address, postfix))
 
     def end(self):
         return self.address + self.size
@@ -260,36 +270,36 @@ class Module(object):
         return '%s (0x%08x - 0x%08x)' % (self._name, self.address, self.end())
 
 class MemoryLayout(object):
-    def __init__(self, startaddress):
+    def __init__(self):
         self.addresses = []
         self.found = {}
         self.reserved = {}
-        self.initial = startaddress
         self.start_at = 0
-        self.module_padding = 0x2000
+        self.initial_address = 0
+        self.module_padding = 0
+        self.x64 = False
 
     def add_reserved(self, name, address):
         self.reserved[name] = (address, 0)
 
     def add(self, filename, name):
-        size = SIZE_OF_IMAGE_FN(filename)
+        size, x64 = SIZE_OF_IMAGE_FN(filename)
         addr = 0
         if name in self.found:
             return  # Assume duplicate files (rshell, ...) are 1:1 copies
-        if name in self.reserved:
-            addr = self.reserved[name][0]
-            self.reserved[name] = (addr, size)
-        self.found[name] = Module(name, addr, size, filename)
+        self.found[name] = Module(name, addr, size, filename, x64)
 
     def _next_address(self, size):
         if self.start_at:
-            addr = (self.start_at - size - self.module_padding - 0xffff) & 0xffff0000
+            addr = (self.start_at - size - self.module_padding - 0xffff) & 0xffffffffffff0000
             self.start_at = addr
         else:
-            addr = self.start_at = self.initial
+            assert self.initial_address
+            addr = self.start_at = self.initial_address
         return addr
 
     def next_address(self, size):
+        assert self.module_padding
         while True:
             current_start = self._next_address(size)
             current_end = current_start + size + self.module_padding
@@ -309,10 +319,20 @@ class MemoryLayout(object):
             if current_start:
                 return current_start
 
-    def update(self, priorities):
+    def _update_reserved(self):
+        for name in self.reserved:
+            addr = self.reserved[name][0]
+            assert name in self.found, name
+            module = self.found[name]
+            module.addr = addr
+            #self.reserved[name] = (addr, size)
+
+    def update(self, priorities, initial_address, module_padding):
+        self.initial_address = initial_address
+        self.module_padding = module_padding
+        self.x64 = is_x64()
+        self._update_reserved()
         # sort addresses, should only contain reserved modules at this point!
-        for key, reserved in self.reserved.items():
-            assert reserved[1] != 0, key
         for curr in priorities:
             if not curr in self.found:
                 print('# Did not find', curr, '!')
@@ -351,15 +371,22 @@ def guess_version(ntdll_path):
 def run_dir(target):
     print('# Generated from', target)
     print('# Generated by sdk/tools/gen_baseaddress.py')
-    layout = MemoryLayout(0x7c920000)
-    layout.add_reserved('user32.dll', 0x77a20000)
+    layout = MemoryLayout()
     for root, _, files in os.walk(target):
         for dll in [filename for filename in files if filename.endswith(ALL_EXTENSIONS)]:
             if not dll in EXCLUDE and not dll.startswith('api-ms-win-'):
                 layout.add(os.path.join(root, dll), dll)
     ntdll_path = layout.found['ntdll.dll'].filename
     guess_version(ntdll_path)
-    layout.update(PRIORITIES)
+    if is_x64():
+        initial_address = 0x0000000078EC0000
+        padding = 0x4000
+        layout.add_reserved('user32.dll', 0x0000000078C30000)
+    else:
+        initial_address = 0x7C910000
+        padding = 0x2000
+        layout.add_reserved('user32.dll', 0x77a20000)
+    layout.update(PRIORITIES, initial_address, padding)
     layout.gen_baseaddress()
 
 def main():
