@@ -229,6 +229,9 @@
                 <DLLFILE>acgenral.dll</DLLFILE>
                 <DESCRIPTION>Shim used to test ReactOS shim engine functionality</DESCRIPTION>
             </SHIM>
+            <SHIM NAME="VerifyVersionInfoLite">
+                <DLLFILE>aclayers.dll</DLLFILE>
+            </SHIM>
             <SHIM NAME="VMHorizonSetup">
                 <DLLFILE>aclayers.dll</DLLFILE>
             </SHIM>
@@ -384,6 +387,9 @@
         </LAYER>
         <LAYER NAME="ForceDXSetupSuccess">
             <SHIM_REF NAME="ForceDXSetupSuccess" />
+        </LAYER>
+        <LAYER NAME="VerifyVersionInfoLiteLayer">
+            <SHIM_REF NAME="VerifyVersionInfoLite" />
         </LAYER>
         <LAYER NAME="VMHorizonSetup">
             <!-- ProductId: {7051C96D-AA61-4D83-AF37-646E82D616ED} -->

@@ -7,6 +7,7 @@ list(APPEND SOURCE
     dispmode.c
     forcedxsetupsuccess.c
     ignoreloadlibrary.c
+    versioninfolite.c
     versionlie.c
     vmhorizon.c
     main.c
