@@ -372,7 +372,7 @@ function(generate_import_lib _libname _dllname _spec_file)
     # Generate the asm stub file and the def file for import library
     add_custom_command(
         OUTPUT ${_asm_stubs_file} ${_def_file}
-        COMMAND native-spec2def --ms -a=${SPEC2DEF_ARCH} --implib -n=${_dllname} -d=${_def_file} -l=${_asm_stubs_file} ${CMAKE_CURRENT_SOURCE_DIR}/${_spec_file}
+        COMMAND native-spec2def --ms -a=${SPEC2DEF_ARCH} ${ARGN} --implib -n=${_dllname} -d=${_def_file} -l=${_asm_stubs_file} ${CMAKE_CURRENT_SOURCE_DIR}/${_spec_file}
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${_spec_file} native-spec2def)
 
     if(MSVC_IDE)
@@ -444,7 +444,7 @@ function(spec2def _dllname _spec_file)
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${_spec_file} native-spec2def)
 
     if(__spec2def_ADD_IMPORTLIB)
-        generate_import_lib(lib${_file} ${_dllname} ${_spec_file})
+        generate_import_lib(lib${_file} ${_dllname} ${_spec_file} ${__version_arg})
         if(__spec2def_NO_PRIVATE_WARNINGS)
             add_target_property(lib${_file} STATIC_LIBRARY_FLAGS "/ignore:4104")
         endif()

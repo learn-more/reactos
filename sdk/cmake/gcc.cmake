@@ -371,7 +371,7 @@ endfunction()
 set(CMAKE_IMPLIB_CREATE_STATIC_LIBRARY "${CMAKE_DLLTOOL} --def <OBJECTS> --kill-at --output-lib=<TARGET>")
 set(CMAKE_IMPLIB_DELAYED_CREATE_STATIC_LIBRARY "${CMAKE_DLLTOOL} --def <OBJECTS> --kill-at --output-delaylib=<TARGET>")
 function(spec2def _dllname _spec_file)
-    
+
     cmake_parse_arguments(__spec2def "ADD_IMPORTLIB;NO_PRIVATE_WARNINGS;WITH_RELAY" "VERSION" "" ${ARGN})
 
     # Get library basename
@@ -401,8 +401,8 @@ function(spec2def _dllname _spec_file)
         if(__spec2def_NO_PRIVATE_WARNINGS)
             set(_extraflags --no-private-warnings)
         endif()
-        
-        generate_import_lib(lib${_file} ${_dllname} ${_spec_file} ${_extraflags})
+
+        generate_import_lib(lib${_file} ${_dllname} ${_spec_file} ${_extraflags} ${__version_arg})
     endif()
 endfunction()
 
