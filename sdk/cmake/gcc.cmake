@@ -372,7 +372,7 @@ set(CMAKE_IMPLIB_CREATE_STATIC_LIBRARY "${CMAKE_DLLTOOL} --def <OBJECTS> --kill-
 set(CMAKE_IMPLIB_DELAYED_CREATE_STATIC_LIBRARY "${CMAKE_DLLTOOL} --def <OBJECTS> --kill-at --output-delaylib=<TARGET>")
 function(spec2def _dllname _spec_file)
 
-    cmake_parse_arguments(__spec2def "ADD_IMPORTLIB;NO_PRIVATE_WARNINGS;WITH_RELAY" "VERSION" "" ${ARGN})
+    cmake_parse_arguments(__spec2def "ADD_IMPORTLIB;NO_PRIVATE_WARNINGS;WITH_RELAY" "VERSION;ADD_IMPORTLIB_NAME" "" ${ARGN})
 
     # Get library basename
     get_filename_component(_file ${_dllname} NAME_WE)
@@ -390,6 +390,10 @@ function(spec2def _dllname _spec_file)
         set(__version_arg "--version=0x${__spec2def_VERSION}")
     endif()
 
+    if(__spec2def_ADD_IMPORTLIB_NAME)
+        set(__spec2def_ADD_IMPORTLIB TRUE)
+    endif()
+
     # Generate exports def and C stubs file for the DLL
     add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_file}.def ${CMAKE_CURRENT_BINARY_DIR}/${_file}_stubs.c
@@ -400,6 +404,9 @@ function(spec2def _dllname _spec_file)
         set(_extraflags)
         if(__spec2def_NO_PRIVATE_WARNINGS)
             set(_extraflags --no-private-warnings)
+        endif()
+        if(__spec2def_ADD_IMPORTLIB_NAME)
+            set(_dllname ${__spec2def_ADD_IMPORTLIB_NAME})
         endif()
 
         generate_import_lib(lib${_file} ${_dllname} ${_spec_file} ${_extraflags} ${__version_arg})

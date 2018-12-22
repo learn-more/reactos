@@ -419,7 +419,7 @@ else()
 endif()
 function(spec2def _dllname _spec_file)
 
-    cmake_parse_arguments(__spec2def "ADD_IMPORTLIB;NO_PRIVATE_WARNINGS;WITH_RELAY" "VERSION" "" ${ARGN})
+    cmake_parse_arguments(__spec2def "ADD_IMPORTLIB;NO_PRIVATE_WARNINGS;WITH_RELAY" "VERSION;ADD_IMPORTLIB_NAME" "" ${ARGN})
 
     # Get library basename
     get_filename_component(_file ${_dllname} NAME_WE)
@@ -437,6 +437,10 @@ function(spec2def _dllname _spec_file)
         set(__version_arg "--version=0x${__spec2def_VERSION}")
     endif()
 
+    if(__spec2def_ADD_IMPORTLIB_NAME)
+        set(__spec2def_ADD_IMPORTLIB TRUE)
+    endif()
+
     # Generate exports def and C stubs file for the DLL
     add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_file}.def ${CMAKE_CURRENT_BINARY_DIR}/${_file}_stubs.c
@@ -444,6 +448,10 @@ function(spec2def _dllname _spec_file)
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${_spec_file} native-spec2def)
 
     if(__spec2def_ADD_IMPORTLIB)
+        if(__spec2def_ADD_IMPORTLIB_NAME)
+            set(_dllname ${__spec2def_ADD_IMPORTLIB_NAME})
+            message(STATUS "${_dllname}")
+        endif()
         generate_import_lib(lib${_file} ${_dllname} ${_spec_file} ${__version_arg})
         if(__spec2def_NO_PRIVATE_WARNINGS)
             add_target_property(lib${_file} STATIC_LIBRARY_FLAGS "/ignore:4104")
