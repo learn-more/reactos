@@ -1,4 +1,4 @@
-#include "advapi32_vista.h"
+#include "../advapi32.h"
 
 #include <winuser.h>
 #include <wine/debug.h>
