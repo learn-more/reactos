@@ -74,6 +74,7 @@ add_library(advapi32_601 SHARED
     ${SOURCE}
     ${NONPCH_SOURCE}
     nt_600/RegLoadMUIString.c
+    nt_600/RegDeleteTree.c
     ${CMAKE_CURRENT_BINARY_DIR}/advapi32_601_stubs.c
     ${CMAKE_CURRENT_BINARY_DIR}/advapi32_601.def)
 
