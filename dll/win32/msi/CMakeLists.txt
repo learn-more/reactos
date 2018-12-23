@@ -73,10 +73,10 @@ add_idl_headers(msi_idlheader msiserver.idl)
 add_typelib(msiserver.idl)
 set_source_files_properties(msi.rc PROPERTIES OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/msiserver.tlb)
 set_module_type(msi win32dll)
-target_link_libraries(msi uuid ${PSEH_LIB} wine)
+target_link_libraries(msi advapi32_601_RegLib uuid ${PSEH_LIB} wine)
 add_dependencies(msi msi_idlheader)
 add_delay_importlibs(msi odbccp32 crypt32 wintrust)
-add_importlibs(msi advapi32 advapi32_vista cabinet comctl32 gdi32 ole32 oleaut32 shell32 shlwapi urlmon user32 version wininet mspatcha
+add_importlibs(msi advapi32 cabinet comctl32 gdi32 ole32 oleaut32 shell32 shlwapi urlmon user32 version wininet mspatcha
     #FIXME : should be in delayed imports
     imagehlp
     msvcrt

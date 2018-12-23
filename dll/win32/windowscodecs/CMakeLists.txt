@@ -80,7 +80,7 @@ add_library(windowscodecs MODULE
     ${ADDITIONAL_SOURCE})
 
 set_module_type(windowscodecs win32dll)
-target_link_libraries(windowscodecs wine uuid ${PSEH_LIB})
-add_importlibs(windowscodecs ole32 oleaut32 rpcrt4 shlwapi user32 gdi32 advapi32 advapi32_vista propsys msvcrt kernel32 ntdll)
+target_link_libraries(windowscodecs advapi32_601_RegLib wine uuid ${PSEH_LIB})
+add_importlibs(windowscodecs ole32 oleaut32 rpcrt4 shlwapi user32 gdi32 advapi32 propsys msvcrt kernel32 ntdll)
 add_pch(windowscodecs precomp.h SOURCE)
 add_cd_file(TARGET windowscodecs DESTINATION reactos/system32 FOR all)

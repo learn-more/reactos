@@ -70,17 +70,23 @@ add_cd_file(TARGET advapi32 DESTINATION reactos/system32 FOR all)
 remove_definitions(-D_WIN32_WINNT=0x502 -DWINVER=0x502)
 add_definitions(-D_WIN32_WINNT=0x601 -DWINVER=0x601)
 
+# Internal ros dlls
+add_library(advapi32_601_RegLib
+    nt_600/RegDeleteTree.c
+    nt_600/RegSetKeyValue.c)
+
+add_dependencies(advapi32_601_RegLib advapi32)
+
 add_library(advapi32_601 SHARED
     ${SOURCE}
     ${NONPCH_SOURCE}
     nt_600/RegLoadMUIString.c
-    nt_600/RegDeleteTree.c
     ${CMAKE_CURRENT_BINARY_DIR}/advapi32_601_stubs.c
     ${CMAKE_CURRENT_BINARY_DIR}/advapi32_601.def)
 
 
 set_module_type(advapi32_601 win32dll UNICODE ENTRYPOINT DllMain 12)
-target_link_libraries(advapi32_601 cryptlib wine ${PSEH_LIB})
+target_link_libraries(advapi32_601 advapi32_601_RegLib cryptlib wine ${PSEH_LIB})
 add_delay_importlibs(advapi32_601 secur32)
 add_importlibs(advapi32_601 rpcrt4 kernel32 ntdll)
 #add_pch(advapi32_601 advapi32.h SOURCE)    # Figure this out later?

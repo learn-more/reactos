@@ -49,8 +49,8 @@ add_library(crypt32 MODULE
     ${CMAKE_CURRENT_BINARY_DIR}/crypt32.def)
 
 set_module_type(crypt32 win32dll)
-target_link_libraries(crypt32 wine ${PSEH_LIB} oldnames)
+target_link_libraries(crypt32 advapi32_601_RegLib wine ${PSEH_LIB} oldnames)
 add_delay_importlibs(crypt32 cryptnet)
-add_importlibs(crypt32 bcrypt user32 advapi32 advapi32_vista msvcrt kernel32 ntdll)
+add_importlibs(crypt32 bcrypt user32 advapi32 msvcrt kernel32 ntdll)
 add_pch(crypt32 precomp.h SOURCE)
 add_cd_file(TARGET crypt32 DESTINATION reactos/system32 FOR all)

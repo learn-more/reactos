@@ -1,10 +1,10 @@
 #include "../advapi32.h"
 
 #include <winuser.h>
-#include <wine/debug.h>
-#include <wine/unicode.h>
+//#include <wine/debug.h>
+//#include <wine/unicode.h>
 
-WINE_DEFAULT_DEBUG_CHANNEL(reg);
+//WINE_DEFAULT_DEBUG_CHANNEL(reg);
 
 #if 0
 // Non-recursive RegDeleteTreeW implementation by Thomas, however it needs bugfixing
@@ -308,7 +308,7 @@ RegDeleteTreeW(HKEY hKey,
     HKEY hSubKey;
     WCHAR szNameBuf[MAX_PATH], *lpszName = szNameBuf;
 
-    TRACE("(hkey=%p,%p %s)\n", hKey, lpszSubKey, debugstr_w(lpszSubKey));
+    //TRACE("(hkey=%p,%p %s)\n", hKey, lpszSubKey, debugstr_w(lpszSubKey));
 
 #if 0
     Status = MapDefaultKey(&KeyHandle,
