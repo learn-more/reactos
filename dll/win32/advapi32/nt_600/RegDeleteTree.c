@@ -301,19 +301,25 @@ RegDeleteTreeW(HKEY hKey,
     LONG ret;
     DWORD dwMaxSubkeyLen, dwMaxValueLen;
     DWORD dwMaxLen, dwSize;
+#if 0
     NTSTATUS Status;
+#endif
     HANDLE KeyHandle;
     HKEY hSubKey;
     WCHAR szNameBuf[MAX_PATH], *lpszName = szNameBuf;
 
     TRACE("(hkey=%p,%p %s)\n", hKey, lpszSubKey, debugstr_w(lpszSubKey));
 
+#if 0
     Status = MapDefaultKey(&KeyHandle,
                            hKey);
     if (!NT_SUCCESS(Status))
     {
         return RtlNtStatusToDosError(Status);
     }
+#else
+    KeyHandle = hKey;
+#endif
 
     hSubKey = KeyHandle;
 
@@ -322,7 +328,9 @@ RegDeleteTreeW(HKEY hKey,
         ret = RegOpenKeyExW(KeyHandle, lpszSubKey, 0, KEY_READ, &hSubKey);
         if (ret)
         {
+#if 0
             ClosePredefKey(KeyHandle);
+#endif
             return ret;
         }
     }
@@ -377,7 +385,9 @@ cleanup:
     if(lpszSubKey)
         RegCloseKey(hSubKey);
 
+#if 0
     ClosePredefKey(KeyHandle);
+#endif
 
     return ret;
 }
