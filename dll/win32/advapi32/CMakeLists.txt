@@ -90,4 +90,4 @@ target_link_libraries(advapi32_601 advapi32_601_RegLib cryptlib wine ${PSEH_LIB}
 add_delay_importlibs(advapi32_601 secur32)
 add_importlibs(advapi32_601 rpcrt4 kernel32 ntdll)
 #add_pch(advapi32_601 advapi32.h SOURCE)    # Figure this out later?
-add_cd_file(TARGET advapi32_601 DESTINATION reactos/winsxs/nt_601 NAME_ON_CD advapi32.dll FOR all)
+add_cd_file(TARGET advapi32_601 DESTINATION reactos/winsxs/nt_601 FOR all)

@@ -10,6 +10,8 @@
 /* INCLUDES *****************************************************************/
 
 #include <ntdll.h>
+#include <ntstrsafe.h>
+#include <compat_undoc.h>
 
 #define NDEBUG
 #include <debug.h>
@@ -932,7 +934,34 @@ RtlDosApplyFileIsolationRedirection_Ustr(IN ULONG Flags,
     Status = find_actctx_dll(pstrParam, &fullname, StaticString, DynamicString != NULL);
     if (!NT_SUCCESS(Status))
     {
-        return Status;
+        static const UNICODE_STRING Advapi32 = RTL_CONSTANT_STRING(L"advapi32.dll");
+        if (RosGetProcessCompatVersion() && RtlEqualUnicodeString(pstrParam, &Advapi32, TRUE))
+        {
+            static const UNICODE_STRING winsxs_nt601 = RTL_CONSTANT_STRING(L"\\winsxs\\nt_601\\advapi32_601.dll");
+
+            SIZE_T needed;
+            //__debugbreak();
+
+
+            needed = (wcslen(SharedUserData->NtSystemRoot) * sizeof(WCHAR) +
+                      winsxs_nt601.Length + pstrParam->Length + 2*sizeof(WCHAR));
+
+
+            Status = get_buffer(&fullname, needed, StaticString, DynamicString != NULL);
+            if (NT_SUCCESS(Status))
+            {
+                Status = RtlStringCbCopyW(fullname, needed, SharedUserData->NtSystemRoot);
+                if (NT_SUCCESS(Status))
+                    Status = RtlStringCbCatW(fullname, needed, winsxs_nt601.Buffer);
+                //if (NT_SUCCESS(Status))
+                //    Status = RtlStringCbCatW(fullname, needed, pstrParam->Buffer);
+
+                ASSERT(NT_SUCCESS(Status));
+            }
+        }
+
+        if (!NT_SUCCESS(Status))
+            return Status;
     }
 
     DPRINT("Redirecting %wZ to %S\n", OriginalName, fullname);
