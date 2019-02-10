@@ -65,3 +65,7 @@
 @ cdecl mbedtls_cipher_crypt(ptr ptr long ptr long ptr ptr)
 @ cdecl mbedtls_cipher_auth_encrypt(ptr ptr long ptr long ptr long ptr ptr ptr long)
 @ cdecl mbedtls_cipher_auth_decrypt(ptr ptr long ptr long ptr long ptr ptr ptr long)
+
+@ cdecl mbedtls_pk_info_from_type(long)
+@ cdecl mbedtls_pk_setup(ptr ptr)
+@ cdecl mbedtls_pk_verify(ptr long ptr long ptr long)
