@@ -920,7 +920,7 @@ static NTSTATUS key_encrypt( struct key *key,  UCHAR *input, ULONG input_len, vo
         if (input && !output) return STATUS_SUCCESS;
         if (output_len < *ret_len) return STATUS_BUFFER_TOO_SMALL;
 
-        if ((status = key_symmetric_set_auth_data( key, auth_info->pbAuthData, auth_info->cbAuthData )))
+        if (auth_info->pbAuthData && (status = key_symmetric_set_auth_data( key, auth_info->pbAuthData, auth_info->cbAuthData )))
             return status;
         if ((status = key_symmetric_encrypt( key, input, input_len, output, output_len ))) return status;
 
