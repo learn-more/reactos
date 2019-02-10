@@ -816,6 +816,53 @@ static NTSTATUS key_export( struct key *key, const WCHAR *type, UCHAR *output, U
     return STATUS_NOT_IMPLEMENTED;
 }
 
+#ifdef __REACTOS__
+static NTSTATUS key_duplicate(struct key *key_orig, struct key *key_copy)
+{
+    UCHAR *buffer;
+    struct algorithm alg;
+
+    key_copy->hdr = key_orig->hdr;
+    key_copy->alg_id = key_orig->alg_id;
+
+    if (key_is_symmetric(key_orig))
+    {
+        alg.id = key_orig->alg_id;
+        alg.mode = key_orig->u.s.mode;
+        key_symmetric_init(key_copy, &alg, key_orig->u.s.secret, key_orig->u.s.secret_len);
+        if (key_orig->u.s.iv)
+        {
+            if (!(key_copy->u.s.iv = HeapAlloc(GetProcessHeap(), 0, key_orig->u.s.iv_len))) return STATUS_NO_MEMORY;
+            memcpy(key_copy->u.s.iv, key_orig->u.s.iv, key_orig->u.s.iv_len);
+            key_copy->u.s.iv_len = key_orig->u.s.iv_len;
+        }
+        if (key_orig->u.s.tag)
+        {
+            if (!(key_copy->u.s.tag = HeapAlloc(GetProcessHeap(), 0, key_orig->u.s.tag_len))) return STATUS_NO_MEMORY;
+            memcpy(key_copy->u.s.tag, key_orig->u.s.tag, key_orig->u.s.tag_len);
+            key_copy->u.s.tag_len = key_orig->u.s.tag_len;
+        }
+        if (key_orig->u.s.ad)
+        {
+            if (!(key_copy->u.s.ad = HeapAlloc(GetProcessHeap(), 0, key_orig->u.s.ad_len))) return STATUS_NO_MEMORY;
+            memcpy(key_copy->u.s.ad, key_orig->u.s.ad, key_orig->u.s.ad_len);
+            key_copy->u.s.ad_len = key_orig->u.s.ad_len;
+        }
+    }
+    else
+    {
+        if (!(buffer = HeapAlloc(GetProcessHeap(), 0, key_orig->u.a.pubkey_len))) return STATUS_NO_MEMORY;
+        memcpy(buffer, key_orig->u.a.pubkey, key_orig->u.a.pubkey_len);
+
+        key_copy->u.a.pubkey = buffer;
+        key_copy->u.a.pubkey_len = key_orig->u.a.pubkey_len;
+
+        return STATUS_SUCCESS;
+    }
+
+    return STATUS_SUCCESS;
+}
+#else
 static NTSTATUS key_duplicate( struct key *key_orig, struct key *key_copy )
 {
     UCHAR *buffer;
@@ -845,6 +892,7 @@ static NTSTATUS key_duplicate( struct key *key_orig, struct key *key_copy )
 
     return STATUS_SUCCESS;
 }
+#endif
 
 static NTSTATUS key_encrypt( struct key *key,  UCHAR *input, ULONG input_len, void *padding, UCHAR *iv,
                              ULONG iv_len, UCHAR *output, ULONG output_len, ULONG *ret_len, ULONG flags )
@@ -893,6 +941,44 @@ static NTSTATUS key_encrypt( struct key *key,  UCHAR *input, ULONG input_len, vo
 
     src = input;
     dst = output;
+#ifdef __REACTOS__
+    if (key->u.s.mode == MODE_ID_CBC)
+    {
+        if (flags & BCRYPT_BLOCK_PADDING)
+        {
+            if ((status = mbedtls_cipher_set_padding_mode(key->u.s.encrypt_handle, MBEDTLS_PADDING_PKCS7))) return STATUS_INTERNAL_ERROR;
+        }
+        else
+        {
+            if ((status = mbedtls_cipher_set_padding_mode(key->u.s.encrypt_handle, MBEDTLS_PADDING_NONE))) return STATUS_INTERNAL_ERROR;
+        }
+    }
+    if (key->u.s.mode == MODE_ID_ECB && (flags & BCRYPT_BLOCK_PADDING))
+    {
+        ULONG block_size;
+
+        block_size = key->u.s.block_size;
+        while (bytes_left >= block_size)
+        {
+            if ((status = key_symmetric_encrypt(key, src, block_size, dst, block_size))) return status;
+            if ((status = key_symmetric_set_params(key, iv, iv_len))) return status;
+            bytes_left -= block_size;
+            src += block_size;
+            dst += block_size;
+        }
+
+        if (flags & BCRYPT_BLOCK_PADDING)
+        {
+            if (!(buf = heap_alloc(block_size))) return STATUS_NO_MEMORY;
+            memcpy(buf, src, bytes_left);
+            memset(buf + bytes_left, block_size - bytes_left, block_size - bytes_left);
+            status = key_symmetric_encrypt(key, buf, block_size, dst, block_size);
+            heap_free(buf);
+        }
+    }
+    else
+        status = key_symmetric_encrypt(key, src, input_len, dst, output_len);
+#else
     while (bytes_left >= key->u.s.block_size)
     {
         if ((status = key_symmetric_encrypt( key, src, key->u.s.block_size, dst, key->u.s.block_size )))
@@ -911,6 +997,7 @@ static NTSTATUS key_encrypt( struct key *key,  UCHAR *input, ULONG input_len, vo
         status = key_symmetric_encrypt( key, buf, key->u.s.block_size, dst, key->u.s.block_size );
         heap_free( buf );
     }
+#endif
 
     return status;
 }
