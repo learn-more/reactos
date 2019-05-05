@@ -78,5 +78,7 @@ eZipConfirmResponse _CZipAskReplace(HWND hDlg, const char* FullPath);
 
 #include "CZipEnumerator.hpp"
 #include "CZipFolder.hpp"
+#include "CZipCreator.hpp"
+#include "CSendTo.hpp"
 
 #endif /* ZIPFLDR_PRECOMP_H */

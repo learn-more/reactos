@@ -2,7 +2,7 @@ HKCR
 {
     NoRemove CLSID
     {
-        '{E88DCCE0-B7B3-11d1-A9F0-00AA0060FA31}' = s 'CompressedFolder'
+        '{e88dcce0-b7b3-11d1-a9f0-00aa0060fa31}' = s 'CompressedFolder'
         {
             InprocServer32 = s '%MODULE%' { val ThreadingModel = s 'Apartment' }
             ProgId = s 'CompressedFolder'
@@ -16,6 +16,18 @@ HKCR
         {
             InprocServer32 = s '%MODULE%' { val ThreadingModel = s 'Apartment' }
         }
+        '{888dca60-fc0a-11cf-8f0f-00c04fd7d062}' = s 'Compressed (zipped) Folder SendTo Target'
+        {
+            InprocServer32 = s '%MODULE%' { val ThreadingModel = s 'Apartment' }
+            DefaultIcon = s '%MODULE%' { }
+            val EditFlags = d '0x01'
+            val NeverShowExt = s ''
+            val FriendlyTypeName = s '%MODULE%,-10195'
+            ShellEx
+            {
+                DropHandler = s '{b8cdcb65-b1bf-4b42-9428-1dfdb7ee92af}' { }
+            }
+        }
     }
     NoRemove Applications
     {
@@ -24,7 +36,7 @@ HKCR
     NoRemove CompressedFolder
     {
         FriendlyTypeName = s '%MODULE%,-10195'
-        CLSID = s '{E88DCCE0-B7B3-11d1-A9F0-00AA0060FA31}'
+        CLSID = s '{e88dcce0-b7b3-11d1-a9f0-00aa0060fa31}'
         DefaultIcon = s '%MODULE%'
 
         NoRemove Shell
@@ -50,5 +62,15 @@ HKCR
     NoRemove '.zip' = s 'CompressedFolder'
     {
         val 'Content Type' = s 'application/x-zip-compressed'
+    }
+}
+HKLM
+{
+    NoRemove Software
+    {
+        NoRemove Classes
+        {
+            '.ZFSendToTarget' = s 'CLSID\\{888dca60-fc0a-11cf-8f0f-00c04fd7d062}'
+        }
     }
 }
