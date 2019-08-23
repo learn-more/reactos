@@ -1629,7 +1629,7 @@ public:
         POINT pt;
         GetCursorPos(&pt);
 
-        SetForegroundWindow(TaskItem->hWnd);
+        //SetForegroundWindow(TaskItem->hWnd);
 
         ActivateTask(TaskItem->hWnd);
 

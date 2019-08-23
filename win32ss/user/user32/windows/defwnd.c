@@ -335,8 +335,17 @@ User32DefWindowProc(HWND hWnd,
             HMENU menu = GetSystemMenu(hWnd, FALSE);
             ERR("WM_POPUPSYSTEMMENU\n");
             if (menu)
+            {
+                SetForegroundWindow(hWnd);
                 TrackPopupMenu(menu, TPM_LEFTBUTTON|TPM_RIGHTBUTTON|TPM_SYSTEM_MENU,
                                LOWORD(lParam), HIWORD(lParam), 0, hWnd, NULL);
+
+                // Post a benign message to force a task switch
+                if (bUnicode)
+                    PostMessageW(hWnd, WM_NULL, NULL, NULL);
+                else
+                    PostMessageA(hWnd, WM_NULL, NULL, NULL);
+            }
             return 0;
         }
 
