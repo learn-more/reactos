@@ -1,0 +1,17 @@
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+STRINGTABLE
+BEGIN
+    IDS_USAGE "\nSFC [/SCANNOW] [/VERIFYONLY] [/SCANFILE=<file>] [/VERIFYFILE=<file>]\n\
+/SCANNOW        Scan all protected system files, and try to repair changed files.\n\
+/VERIFYONLY     Scan all protected system files, without trying to repair changed files.\n\
+/SCANFILE       Scan the indicated file, and try to repair it when needed.\n\
+/VERIFYFILE     Scan the indicated file, without trying to repair changed files.\n"
+
+
+END
+
+STRINGTABLE
+BEGIN
+    IDS_ERROR_PRIV      "Failed to set the driver load privilege (0x%X)\n"
+END
