@@ -1,12 +1,12 @@
-@ stdcall -stub sfc_1()
-@ stdcall -stub sfc_2()
-@ stdcall -stub sfc_3()
-@ stdcall -stub sfc_4()
-@ stdcall -stub sfc_5()
-@ stdcall -stub sfc_6()
-@ stdcall -stub sfc_7()
-@ stdcall sfc_8()
-@ stdcall sfc_9()
+1 stdcall -noname SfcInitProt() sfc_os.SfcInitProt
+2 stdcall -noname SfcTerminateWatcherThread() sfc_os.SfcTerminateWatcherThread
+3 stdcall -noname SfcConnectToServer(long) sfc_os.SfcConnectToServer
+4 stdcall -noname SfcClose() sfc_os.SfcClose
+5 stdcall -noname SfcFileException(long ptr long) sfc_os.SfcFileException
+6 stdcall -noname SfcInitiateScan() sfc_os.SfcInitiateScan
+7 stdcall -noname SfcInstallProtectedFiles() sfc_os.SfcInstallProtectedFiles
+8 stdcall -noname SfpInstallCatalog()
+9 stdcall -noname SfpDeleteCatalog()
 @ stdcall SRSetRestorePoint(ptr ptr) SRSetRestorePointA
 @ stdcall SRSetRestorePointA(ptr ptr)
 @ stdcall SRSetRestorePointW(ptr ptr)

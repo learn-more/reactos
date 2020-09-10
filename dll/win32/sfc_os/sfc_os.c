@@ -27,17 +27,13 @@
 #include <winreg.h>
 #include <winuser.h>
 #include <winwlx.h>
+#include <ndk/umtypes.h>
+#include <sfc.h>
 
 #define NDEBUG
 #include <debug.h>
 
 HINSTANCE hLibModule;
-
-typedef struct _PROTECTED_FILE_DATA
-{
-    WCHAR FileName[MAX_PATH];
-    DWORD FileNumber;
-} PROTECTED_FILE_DATA, *PPROTECTED_FILE_DATA;
 
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
@@ -172,6 +168,43 @@ DWORD WINAPI SfcFileException(DWORD dwUnknown0, PWCHAR pwszFile, DWORD dwUnknown
     UNIMPLEMENTED;
     /* Always return success */
     return 0;
+}
+
+/******************************************************************
+ *              SfcInitProt         [sfc_os.@]
+ *
+ * Initializes the protection
+ *
+ * PARAMS
+ *  dwUnknown0    [I] Set to 0
+ *  dwUnknown1    [I] Set to 0
+ *  dwUnknown2    [I] Set to 0
+ *  dwQuota       [I] Set to 50
+ *  dwUnknown4    [I] Set to 0
+ *  dwUnknown5    [I] Set to 0
+ *  dwUnknown6    [I] Set to 0
+ *
+ * RETURNS
+ *  NTSTATUS
+ *
+ */
+NTSTATUS WINAPI SfcInitProt(DWORD dwUnknown0, DWORD dwUnknown1, DWORD dwUnknown2, DWORD dwQuota, DWORD dwUnknown4, DWORD dwUnknown5, DWORD dwUnknown6)
+{
+    UNIMPLEMENTED;
+
+    return STATUS_NOT_IMPLEMENTED;
+}
+
+/******************************************************************
+ *              SfcTerminateWatcherThread   [sfc_os.@]
+ *
+ * Stops the protection
+ *
+ *
+ */
+VOID WINAPI SfcTerminateWatcherThread()
+{
+    UNIMPLEMENTED;
 }
 
 /******************************************************************

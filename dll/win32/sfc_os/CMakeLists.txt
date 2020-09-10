@@ -1,4 +1,6 @@
 
+project(sfc)
+
 spec2def(sfc_os.dll sfc_os.spec ADD_IMPORTLIB)
 
 list(APPEND SOURCE

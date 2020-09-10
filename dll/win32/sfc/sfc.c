@@ -41,12 +41,12 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
     return TRUE;
 }
 
-DWORD WINAPI sfc_8()
+DWORD WINAPI SfpInstallCatalog()
 {
     return ERROR_CALL_NOT_IMPLEMENTED;
 }
 
-DWORD WINAPI sfc_9()
+DWORD WINAPI SfpDeleteCatalog()
 {
     return ERROR_CALL_NOT_IMPLEMENTED;
 }
