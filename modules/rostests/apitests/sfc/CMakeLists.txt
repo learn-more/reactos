@@ -1,4 +1,6 @@
 
+project(sfc)
+
 list(APPEND SOURCE
     SfcGetFiles.c
     SfcIsFileProtected.c
