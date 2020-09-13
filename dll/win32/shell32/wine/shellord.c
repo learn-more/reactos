@@ -326,6 +326,7 @@ BOOL WINAPI RegisterShellHook(
     return FALSE;
 }
 
+#if 0
 /*************************************************************************
  * ShellMessageBoxW				[SHELL32.182]
  *
@@ -376,6 +377,7 @@ int ShellMessageBoxW(
         LocalFree(pszTemp);
 	return ret;
 }
+#endif
 
 /*************************************************************************
  * ShellMessageBoxA				[SHELL32.183]

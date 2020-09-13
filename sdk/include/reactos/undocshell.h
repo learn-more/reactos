@@ -591,6 +591,19 @@ HRESULT WINAPI ShellExecCmdLine(
     LPVOID pUnused,
     DWORD dwSeclFlags);
 
+/* shlwapi private (ordinal only) export */
+int
+WINAPIV
+ShellMessageBoxWrapW(
+  _In_opt_ HINSTANCE hAppInst,
+  _In_opt_ HWND hWnd,
+  _In_ LPCWSTR lpcText,
+  _In_opt_ LPCWSTR lpcTitle,
+  _In_ UINT fuStyle,
+  ...);
+
+
+
 /* RegisterShellHook types */
 #define RSH_DEREGISTER        0
 #define RSH_REGISTER          1

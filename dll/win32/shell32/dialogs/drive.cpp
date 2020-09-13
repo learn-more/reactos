@@ -435,7 +435,7 @@ FormatExCB(
         case DONE:
             pSuccess = (PBOOLEAN)ActionInfo;
             bSuccess = (*pSuccess);
-            ShellMessageBoxW(shell32_hInstance, FormatDrvDialog, MAKEINTRESOURCEW(IDS_FORMAT_COMPLETE), MAKEINTRESOURCEW(IDS_FORMAT_TITLE), MB_OK | MB_ICONINFORMATION);
+            ShellMessageBoxWrapW(shell32_hInstance, FormatDrvDialog, MAKEINTRESOURCEW(IDS_FORMAT_COMPLETE), MAKEINTRESOURCEW(IDS_FORMAT_TITLE), MB_OK | MB_ICONINFORMATION);
             SendDlgItemMessageW(FormatDrvDialog, 28678, PBM_SETPOS, 0, 0);
             break;
 
@@ -638,7 +638,7 @@ FormatDriveDlg(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
                     if (pContext->bFormattingNow)
                         break;
 
-                    if (ShellMessageBoxW(shell32_hInstance, hwndDlg,
+                    if (ShellMessageBoxWrapW(shell32_hInstance, hwndDlg,
                                          MAKEINTRESOURCEW(IDS_FORMAT_WARNING),
                                          MAKEINTRESOURCEW(IDS_FORMAT_TITLE),
                                          MB_OKCANCEL | MB_ICONWARNING) == IDOK)
