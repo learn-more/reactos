@@ -2,7 +2,7 @@
  * PROJECT:     Dr. Watson crash reporter
  * LICENSE:     GPL-2.0+ (https://spdx.org/licenses/GPL-2.0+)
  * PURPOSE:     Debug loop
- * COPYRIGHT:   Copyright 2017 Mark Jansen <mark.jansen@reactos.org>
+ * COPYRIGHT:   Copyright 2017-2021 Mark Jansen <mark.jansen@reactos.org>
  */
 
 #include "precomp.h"
@@ -91,6 +91,14 @@ bool UpdateFromEvent(DEBUG_EVENT& evt, DumpData& data)
         {
             data.Threads.erase(it);
         }
+
+        // The first thread to exit will be the debug thread (DbgUiRemoteBreakin)
+        if (data.Event)
+        {
+            SetEvent(data.Event);
+            CloseHandle(data.Event);
+            data.Event = NULL;
+        }
     }
         break;
     case LOAD_DLL_DEBUG_EVENT:
@@ -124,12 +132,6 @@ bool UpdateFromEvent(DEBUG_EVENT& evt, DumpData& data)
                 {
                     data.FirstBPHit = true;
 
-                    if (data.Event)
-                    {
-                        SetEvent(data.Event);
-                        CloseHandle(data.Event);
-                        data.Event = NULL;
-                    }
                     return true;
                 }
                 break;

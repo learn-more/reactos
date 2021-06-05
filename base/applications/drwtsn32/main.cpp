@@ -2,7 +2,7 @@
  * PROJECT:     Dr. Watson crash reporter
  * LICENSE:     GPL-2.0+ (https://spdx.org/licenses/GPL-2.0+)
  * PURPOSE:     Entrypoint / main print function
- * COPYRIGHT:   Copyright 2017 Mark Jansen <mark.jansen@reactos.org>
+ * COPYRIGHT:   Copyright 2017-2021 Mark Jansen <mark.jansen@reactos.org>
  */
 
 #include "precomp.h"
@@ -13,6 +13,7 @@
 #include <tchar.h>
 #include <strsafe.h>
 #include <tlhelp32.h>
+#include <regstr.h>
 #include <dbghelp.h>
 #include <conio.h>
 #include <atlbase.h>
@@ -26,6 +27,9 @@ static const char szUsage[] = "Usage: DrWtsn32 [-i] [-g] [-p dddd] [-e dddd] [-?
                               "    -p dddd: Attach to process dddd.\n"
                               "    -e dddd: Signal the event dddd.\n"
                               "    -?: This help.\n";
+
+static const wchar_t szSelftestEventName[] = L"Local\\drwtsn32-test-evt";
+
 
 extern "C"
 NTSYSAPI ULONG NTAPI vDbgPrintEx(_In_ ULONG ComponentId, _In_ ULONG Level, _In_z_ PCCH Format, _In_ va_list ap);
@@ -264,6 +268,68 @@ HRESULT WriteMinidump(LPCWSTR LogFilePath, DumpData& data)
     return hr;
 }
 
+DWORD StartSelfTestProcess()
+{
+    STARTUPINFOW si = { sizeof(si) };
+    PROCESS_INFORMATION pi;
+
+    WCHAR szDebugger[MAX_PATH * 2] = L"\"";
+
+
+    GetModuleFileNameW(NULL, szDebugger + 1, _countof(szDebugger) - 2);
+    StringCchCatW(szDebugger, _countof(szDebugger), L"\" -openandwait");
+
+    if (!CreateProcessW(NULL, szDebugger, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi))
+        return 0;
+
+    CloseHandle(pi.hThread);
+    // Wait a bit for the process, so it can open the event
+    WaitForSingleObject(pi.hProcess, 1000);
+    CloseHandle(pi.hProcess);
+    return pi.dwProcessId;
+}
+
+int InstallAsAeDebugger()
+{
+    HKEY hKey;
+    WCHAR szAuto[] = L"2";
+    WCHAR szDebugger[MAX_PATH * 2] = L"\"";
+    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, REGSTR_PATH_AEDEBUG, 0, KEY_QUERY_VALUE | KEY_SET_VALUE, &hKey) != ERROR_SUCCESS)
+    {
+        return abort(stdout, 0);
+    }
+    RegSetValueExW(hKey, REGSTR_VAL_AEDEBUG_AUTO, 0, REG_SZ, (const BYTE*)szAuto, sizeof(szAuto));
+
+    GetModuleFileNameW(NULL, szDebugger + 1, _countof(szDebugger) - 2);
+    StringCchCatW(szDebugger, _countof(szDebugger), L"\" -p %ld -e %ld -g");
+
+    RegSetValueExW(
+        hKey, REGSTR_VAL_AEDEBUG_DEBUGGER, 0, REG_SZ, (const BYTE*)szDebugger,
+        (wcslen(szDebugger) + 1) * sizeof(WCHAR));
+
+    CloseHandle(hKey);
+
+    MessageBoxA(NULL, "ReactOS Crash Reporter has been installed as the default application debugger", "ReactOS Crash Reporter", MB_OK);
+    return abort(stdout, 0);
+}
+
+int WaitAndCrash()
+{
+    HANDLE hEvt = OpenEventW(SYNCHRONIZE, FALSE, szSelftestEventName);
+    if (hEvt)
+    {
+        // Wait for the event to be signaled (indicating that the debugger is attached, the debug thread has gone away)
+        WaitForSingleObject(hEvt, INFINITE);
+        // Now we can crash
+        DebugBreak();
+    }
+    else
+    {
+        MessageBoxA(NULL, "ERR", "ERR", MB_OK);
+    }
+    return abort(stdout, 0);
+}
+
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR cmdLine, INT)
 {
     int argc;
@@ -282,10 +348,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR cmdLine, INT)
 
         if (!wcscmp(arg, L"-i"))
         {
-            /* FIXME: Installs as the postmortem debugger. */
+            return InstallAsAeDebugger();
         }
         else if (!wcscmp(arg, L"-g"))
         {
+            /* Ignore for compat reasons */
         }
         else if (!wcscmp(arg, L"-p"))
         {
@@ -312,6 +379,29 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR cmdLine, INT)
         {
             xfprintf(stdout, "%s\n", szUsage);
             return abort(stdout, 0);
+        }
+        else if (!wcscmp(arg, L"-selftest"))
+        {
+            // Simple self-test (can be used while the current instance is being debugged!):
+            // - Register an event as 'Debug' event
+            // - Spawn a second copy of drwtsn32, that will wait on this event
+            // - Attach to the second copy (as usual)
+            // - Kick the 'Debug' event (normally an indication that the debugging thread went away)
+            // - The second copy will now crash itself by calling DebugBreak
+            // - This instance will detect the crash, and create a dump
+            data.Event = CreateEventW(NULL, TRUE, FALSE, szSelftestEventName);
+            pid = StartSelfTestProcess();
+            if (!pid)
+            {
+                xfprintf(stdout, "Failed starting self-test\n");
+                return abort(stdout, 0);
+            }
+            // Break out of the for-loop to allow debugging the child we just started!
+            break;
+        }
+        else if (!wcscmp(arg, L"-openandwait"))
+        {
+            return WaitAndCrash();
         }
     }
 
